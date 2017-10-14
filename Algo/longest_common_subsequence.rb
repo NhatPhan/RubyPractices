@@ -5,9 +5,10 @@ def main(a, b)
   solutions = setup(a, b)
   lcs(a, b, solutions)
 
+  lcs_string = get_lcs_string(solutions, a, b)
   puts 'Longest Common Substring: '
-  puts "Length: #{solutions[a.length][b.length]}"
-  puts "String: #{print_lcs_string(solutions, a, b)}"
+  puts "Length: #{lcs_string.length}"
+  puts "String: #{lcs_string}"
 end
 
 # Setup DP storage
@@ -15,8 +16,8 @@ def setup(a, b)
   solutions = Array.new(a.length + 1) { Array.new(b.length + 1) { Array.new(2, nil) } }
   solutions[0][0][0] = 0
 
-  (0..a.length).each { |row| solutions[row][0][0] = row }
-  (1..b.length).each { |col| solutions[0][col][0] = col }
+  (0..a.length).each { |row| solutions[row][0][0] = 0 }
+  (1..b.length).each { |col| solutions[0][col][0] = 0 }
 
   solutions
 end
@@ -25,7 +26,7 @@ def lcs(a, b, solutions)
   (1..a.length).each do |i|
     (1..b.length).each do |j|
       if a[i-1] == b[j-1]
-        solutions[i][j] = [solutions[i-1][j-1][0], DIRECTIONS[:diagonal]]
+        solutions[i][j] = [1 + solutions[i-1][j-1][0], DIRECTIONS[:diagonal]]
       else
         solutions[i][j] = solutions[i][j-1][0] > solutions[i-1][j][0] ?
                               [solutions[i][j-1][0], DIRECTIONS[:left]] :
@@ -36,7 +37,7 @@ def lcs(a, b, solutions)
 end
 
 # Follow the directions to get the common substring
-def print_lcs_string(solutions, a, b)
+def get_lcs_string(solutions, a, b)
   lcs_string = []
   row, col = a.length, b.length
 
