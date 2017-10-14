@@ -1,11 +1,17 @@
+require 'benchmark'
+
 def main(*arr)
   edges = create_dag_edges(arr) # create dag from smaller to larger item
   lis_dp = Hash.new # dynamic programming storage
 
   results = []
-  arr.each_index { |i| results << lis(i, edges, lis_dp) }
+
+  time = Benchmark.measure {
+    arr.each_index { |i| results << lis(i, edges, lis_dp) }
+  }
 
   print_results(results, arr)
+  puts "Time taken: #{time.real}"
 end
 
 def create_dag_edges(arr)
