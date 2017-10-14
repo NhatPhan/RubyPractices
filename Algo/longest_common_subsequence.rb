@@ -5,10 +5,7 @@ def main(a, b)
   solutions = setup(a, b)
   lcs(a, b, solutions)
 
-  lcs_string = get_lcs_string(solutions, a, b)
-  puts 'Longest Common Substring: '
-  puts "Length: #{lcs_string.length}"
-  puts "String: #{lcs_string}"
+  puts "Longest Common Substring: #{get_lcs_string(solutions, a, b)}"
 end
 
 # Setup DP storage
