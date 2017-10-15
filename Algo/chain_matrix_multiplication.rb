@@ -1,13 +1,31 @@
+require 'benchmark'
+
 FIXNUM_MAX = (2**(0.size * 8 -2) -1)
 
 def main
-  n, matrices = get_inputs
+  puts 'Choose your preferred method to input matrix dimensions: '
+  puts '1. Manually     2. Auto-generated'
+
+  method = gets.to_i
+  abort('Must input number 1 or 2! Aborting...') unless [1,2].include?(method)
+
+  n, matrices = (method == 1) ? get_inputs_manually : get_inputs_random
   solutions = setup_solutions(n)
-  min_cost(solutions, matrices, 1, n)
+
+  top_down_time = Benchmark.measure {
+    min_cost_top_down(solutions, matrices, 1, n)
+  }
+
+  bottom_up_time = Benchmark.measure {
+    min_cost_bottom_up(solutions, matrices, n)
+  }
+
   print_results(solutions, n)
+  puts "Time taken top-down: #{top_down_time.real}"
+  puts "Time taken bottom-up: #{bottom_up_time.real}"
 end
 
-def get_inputs
+def get_inputs_manually
   puts 'Enter number of matrices: '
   n = gets.to_i
 
@@ -22,6 +40,17 @@ def get_inputs
   [n, matrices]
 end
 
+def get_inputs_random
+  puts 'Enter number of matrices: '
+  n = gets.to_i
+
+  matrices = Hash.new
+  matrices[1] = [1 + rand(100), 1 + rand(100)]
+  (2..n).each { |i| matrices[i] = [matrices[i-1][1], 1 + rand(100)] }
+
+  [n, matrices]
+end
+
 def setup_solutions(n)
   solutions = Array.new(n + 1){ Array.new(n + 1) { [nil, nil] } }
 
@@ -31,15 +60,15 @@ def setup_solutions(n)
   solutions
 end
 
-def min_cost(solutions, matrices, i, j)
+def min_cost_top_down(solutions, matrices, i, j)
   return [0, nil] if i == j
 
   result= solutions[i][j][0] || FIXNUM_MAX
   best_cut = solutions[i][j][1]
 
   (i..j-1).each do |k|
-    solutions[i][k][0] ||= min_cost(solutions, matrices, i, k)
-    solutions[k+1][j][0] ||= min_cost(solutions, matrices, k + 1, j)
+    solutions[i][k][0] ||= min_cost_top_down(solutions, matrices, i, k)
+    solutions[k+1][j][0] ||= min_cost_top_down(solutions, matrices, k + 1, j)
 
     current_min = solutions[i][k][0] + solutions[k+1][j][0] +
                   matrices[i][0] * matrices[k][1] * matrices[j][1]
@@ -49,6 +78,23 @@ def min_cost(solutions, matrices, i, j)
 
   best_cut = nil if j - i == 1
   solutions[i][j] = [result, best_cut]
+end
+
+def min_cost_bottom_up(solutions, matrices, n)
+  (1..n-1).each do |l|
+    (1..n-l).each do |i|
+      j = i + l
+      result= solutions[i][j][0] || FIXNUM_MAX
+      best_cut = solutions[i][j][1]
+      (i..(j-1)).each do |k|
+        current_min = solutions[i][k][0] + solutions[k+1][j][0] +
+            matrices[i][0] * matrices[k][1] * matrices[j][1]
+
+        result, best_cut = current_min, k if current_min < result
+      end
+      solutions[i][j] = [result, best_cut]
+    end
+  end
 end
 
 def print_results(solutions, n)
