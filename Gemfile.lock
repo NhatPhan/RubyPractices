@@ -2,12 +2,14 @@ GEM
   remote: https://rubygems.org/
   specs:
     PriorityQueue (0.1.2)
+    byebug (9.1.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   PriorityQueue (~> 0.1.2)
+  byebug
 
 BUNDLED WITH
    1.15.4
